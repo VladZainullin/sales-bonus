@@ -55,7 +55,7 @@ function analyzeSalesData(data, options) {
                 .reduce((a, b) => a.total_amount + b.total_amount, 0),
             profit: data.purchase_records
                 .filter(purchase => purchase.seller_id === seller.id)
-                .map(purchase => calculateRevenue(purchase, data.find(p => p.sku === purchase.sku)))
+                .map(purchase => calculateRevenue(purchase, data.products.find(p => p.sku === purchase.sku)))
                 .reduce((a, b) => a + b, 0),
             sales_count: data.purchase_records.filter(purchase => purchase.seller_id === seller.id).length,
             top_products: data.purchase_records
