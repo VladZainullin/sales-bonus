@@ -7,7 +7,7 @@
 function calculateSimpleRevenue(purchase, _product) {
     // @TODO: Расчет прибыли от операции
     const {discount, sale_price, quantity} = purchase;
-    return _product.purchase_price - sale_price * quantity * (1 - discount / 100);
+    return sale_price * quantity * (1 - discount / 100) - _product.purchase_price;
 }
 
 /**
@@ -52,17 +52,23 @@ function analyzeSalesData(data, options) {
             name: seller.first_name + ' ' + seller.last_name,
             revenue: data.purchase_records
                 .filter(purchase => purchase.seller_id === seller.id)
-                .reduce((a, b) => a.total_amount + b.total_amount, 0),
+                .map(purchase => purchase.total_amount)
+                .reduce((a, b) => a + b, 0),
             profit: data.purchase_records
                 .filter(purchase => purchase.seller_id === seller.id)
-                .map(purchase => calculateRevenue(purchase, data.products.find(p => p.sku === purchase.sku)))
+                .flatMap(purchase => purchase.items)
+                .map(purchaseItem => calculateRevenue(
+                    purchaseItem,
+                    data.products.find(p => p.sku === purchaseItem.sku)))
                 .reduce((a, b) => a + b, 0),
-            sales_count: data.purchase_records.filter(purchase => purchase.seller_id === seller.id).length,
+            sales_count: data.purchase_records
+                .filter(purchase => purchase.seller_id === seller.id).length,
             top_products: data.purchase_records
                 .filter(purchase => purchase.seller_id === seller.id)
-                .map(purchase => ({
-                    sku: purchase.sku,
-                    quantity: purchase.quantity,
+                .flatMap(purchase => purchase.items)
+                .map(purchaseItem => ({
+                    sku: purchaseItem.sku,
+                    quantity: purchaseItem.quantity,
                 }))
                 .toSorted((a, b) => b.quantity - a.quantity)
                 .slice(0, 10)
@@ -73,6 +79,8 @@ function analyzeSalesData(data, options) {
             ...seller,
             bonus: calculateBonus(index, array.length, seller)
         }));
+
+    debugger;
 
     // @TODO: Проверка входных данных
 
