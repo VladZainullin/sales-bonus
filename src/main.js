@@ -46,7 +46,7 @@ function analyzeSalesData(data, options) {
 
     const {calculateRevenue, calculateBonus} = options;
 
-    let result = data.sellers
+    return data.sellers
         .map(seller => ({
             seller_id: seller.id,
             name: seller.first_name + ' ' + seller.last_name,
@@ -79,22 +79,4 @@ function analyzeSalesData(data, options) {
             ...seller,
             bonus: calculateBonus(index, array.length, seller)
         }));
-
-    debugger;
-
-    // @TODO: Проверка входных данных
-
-    // @TODO: Проверка наличия опций
-
-    // @TODO: Подготовка промежуточных данных для сбора статистики
-
-    // @TODO: Индексация продавцов и товаров для быстрого доступа
-
-    // @TODO: Расчет выручки и прибыли для каждого продавца
-
-    // @TODO: Сортировка продавцов по прибыли
-
-    // @TODO: Назначение премий на основе ранжирования
-
-    // @TODO: Подготовка итоговой коллекции с нужными полями
 }
