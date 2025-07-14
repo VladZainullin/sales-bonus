@@ -44,6 +44,31 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function analyzeSalesData(data, options) {
 
+    if (!data) {
+        throw new Error('Входные данные отсутствуют');
+    }
+
+    if (data.products.length === 0
+        || !Array.isArray(data.products)) {
+        throw new Error('Некорректные данные товаров');
+    }
+
+    if (data.customers.length === 0
+        || !Array.isArray(data.customers)) {
+        throw new Error('Некорректные данные покупателей');
+    }
+
+    if (data.sellers.length === 0
+        || !Array.isArray(data.sellers)
+    ) {
+        throw new Error('Некорректные данные продавцов');
+    }
+
+    if (data.purchase_records.length === 0
+        || !Array.isArray(data.purchase_records)) {
+        throw new Error('Некорректные данные записей о продажах');
+    }
+
     const {calculateRevenue, calculateBonus} = options;
 
     return data.sellers
