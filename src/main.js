@@ -21,15 +21,15 @@ function calculateBonusByProfit(index, total, seller) {
     // @TODO: Расчет бонуса от позиции в рейтинге
     let {profit} = seller;
 
-    if (index === 1) {
+    if (index === 0) {
         return 0.15 * profit;
     }
 
-    if (index === 2 || index === 3) {
+    if (index === 1 || index === 2) {
         return 0.1 * profit;
     }
 
-    if (index === total) {
+    if (index === total - 1) {
         return 0;
     }
 
