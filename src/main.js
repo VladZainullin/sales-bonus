@@ -43,6 +43,37 @@ function calculateBonusByProfit(index, total, seller) {
  * @returns {{revenue, top_products, bonus, name, sales_count, profit, seller_id}[]}
  */
 function analyzeSalesData(data, options) {
+
+    const {calculateRevenue, calculateBonus} = options;
+
+    let result = data.sellers
+        .map(seller => ({
+            seller_id: seller.id,
+            name: seller.first_name + ' ' + seller.last_name,
+            revenue: data.purchase_records
+                .filter(purchase => purchase.seller_id === seller.id)
+                .reduce((a, b) => a.total_amount + b.total_amount, 0),
+            profit: data.purchase_records
+                .filter(purchase => purchase.seller_id === seller.id)
+                .map(purchase => calculateRevenue(purchase, data.find(p => p.sku === purchase.sku)))
+                .reduce((a, b) => a + b, 0),
+            sales_count: data.purchase_records.filter(purchase => purchase.seller_id === seller.id).length,
+            top_products: data.purchase_records
+                .filter(purchase => purchase.seller_id === seller.id)
+                .map(purchase => ({
+                    sku: purchase.sku,
+                    quantity: purchase.quantity,
+                }))
+                .toSorted((a, b) => b.quantity - a.quantity)
+                .slice(0, 10)
+
+        }))
+        .toSorted((a, b) => b.profit - a.profit)
+        .map((seller, index, array) => ({
+            ...seller,
+            bonus: calculateBonus(index, array.length, seller)
+        }));
+
     // @TODO: Проверка входных данных
 
     // @TODO: Проверка наличия опций
