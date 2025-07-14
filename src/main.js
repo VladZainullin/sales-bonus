@@ -7,7 +7,7 @@
 function calculateSimpleRevenue(purchase, _product) {
     // @TODO: Расчет прибыли от операции
     const {discount, sale_price, quantity} = purchase;
-    return (sale_price * (1 - discount / 100) - _product.purchase_price) * quantity;
+    return (sale_price * (1 - discount / 100)) * quantity;
 }
 
 /**
@@ -85,7 +85,9 @@ function analyzeSalesData(data, options) {
                 .flatMap(purchase => purchase.items)
                 .map(purchaseItem => calculateRevenue(
                     purchaseItem,
-                    data.products.find(p => p.sku === purchaseItem.sku)))
+                    data.products.find(p => p.sku === purchaseItem.sku))
+                    - purchaseItem.quantity
+                    * data.products.find(p => p.sku === purchaseItem.sku).purchase_price)
                 .reduce((a, b) => a + b, 0)
                 .toFixed(2),
             sales_count: data.purchase_records
