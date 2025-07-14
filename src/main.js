@@ -71,36 +71,52 @@ function analyzeSalesData(data, options) {
 
     const {calculateRevenue, calculateBonus} = options;
 
+    function getRevenue(seller) {
+        return +data.purchase_records
+            .filter(purchase => purchase.seller_id === seller.id)
+            .map(purchase => purchase.total_amount)
+            .reduce((a, b) => a + b, 0)
+            .toFixed(2);
+    }
+
+    function getProfit(seller) {
+        return +data.purchase_records
+            .filter(purchase => purchase.seller_id === seller.id)
+            .flatMap(purchase => purchase.items)
+            .map(purchaseItem => calculateRevenue(
+                    purchaseItem,
+                    data.products.find(p => p.sku === purchaseItem.sku))
+                - purchaseItem.quantity
+                * data.products.find(p => p.sku === purchaseItem.sku).purchase_price)
+            .reduce((a, b) => a + b, 0)
+            .toFixed(2);
+    }
+
+    function getTopProducts(seller) {
+        return data.purchase_records
+            .filter(purchase => purchase.seller_id === seller.id)
+            .flatMap(purchase => purchase.items)
+            .map(purchaseItem => ({
+                sku: purchaseItem.sku,
+                quantity: purchaseItem.quantity,
+            }))
+            .toSorted((a, b) => b.quantity - a.quantity)
+            .slice(0, 10);
+    }
+
+    function getSalesCount(seller) {
+        return data.purchase_records
+            .filter(purchase => purchase.seller_id === seller.id).length;
+    }
+
     return data.sellers
         .map(seller => ({
             seller_id: seller.id,
             name: seller.first_name + ' ' + seller.last_name,
-            revenue: +data.purchase_records
-                .filter(purchase => purchase.seller_id === seller.id)
-                .map(purchase => purchase.total_amount)
-                .reduce((a, b) => a + b, 0)
-                .toFixed(2),
-            profit: +data.purchase_records
-                .filter(purchase => purchase.seller_id === seller.id)
-                .flatMap(purchase => purchase.items)
-                .map(purchaseItem => calculateRevenue(
-                    purchaseItem,
-                    data.products.find(p => p.sku === purchaseItem.sku))
-                    - purchaseItem.quantity
-                    * data.products.find(p => p.sku === purchaseItem.sku).purchase_price)
-                .reduce((a, b) => a + b, 0)
-                .toFixed(2),
-            sales_count: data.purchase_records
-                .filter(purchase => purchase.seller_id === seller.id).length,
-            top_products: data.purchase_records
-                .filter(purchase => purchase.seller_id === seller.id)
-                .flatMap(purchase => purchase.items)
-                .map(purchaseItem => ({
-                    sku: purchaseItem.sku,
-                    quantity: purchaseItem.quantity,
-                }))
-                .toSorted((a, b) => b.quantity - a.quantity)
-                .slice(0, 10)
+            revenue: getRevenue(seller),
+            profit: getProfit(seller),
+            sales_count: getSalesCount(seller),
+            top_products: getTopProducts(seller)
 
         }))
         .toSorted((a, b) => b.profit - a.profit)
