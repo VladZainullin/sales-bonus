@@ -120,7 +120,8 @@ function analyzeSalesData(data, options) {
             top_products: getTopProducts(seller)
 
         }))
-        .toSorted((a, b) => b.profit - a.profit)
+        .slice()
+        .sort((a, b) => b.profit - a.profit)
         .map((seller, index, array) => ({
             ...seller,
             bonus: +calculateBonus(index, array.length, seller).toFixed(2)
