@@ -96,6 +96,16 @@ function analyzeSalesData(data, options) {
         return data.purchase_records
             .filter(purchase => purchase.seller_id === seller.id)
             .flatMap(purchase => purchase.items)
+            .reduce((acc, purchase) => {
+                let item = acc.find(i => i.sku === purchase.sku);
+                if (!item) {
+                    acc.push({sku: purchase.sku, quantity: purchase.quantity});
+                    return acc;
+                }
+
+                item.quantity += purchase.quantity;
+                return acc;
+            }, [])
             .map(purchaseItem => ({
                 sku: purchaseItem.sku,
                 quantity: purchaseItem.quantity,
